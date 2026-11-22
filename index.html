@@ -341,7 +341,7 @@
         const page = await response.json();
         for (const {name, fields = {}} of page.documents ?? []) {
           records.push({id: name.split('/').pop(), ...Object.fromEntries(Object.entries(fields).map(([key, value]) => [
-            key, value.stringValue ?? (value.integerValue === undefined ? undefined : Number(value.integerValue))
+            key, value.booleanValue ?? value.stringValue ?? (value.integerValue === undefined ? undefined : Number(value.integerValue))
           ]))});
         }
         if (page.nextPageToken) params.set('pageToken', page.nextPageToken);
@@ -354,18 +354,22 @@
       retry.hidden = true;
       status.textContent = 'Cargando la carta…';
       try {
-        showMenu(await fetchPublishedMenu());
+        const published = await fetchPublishedMenu();
+        if (published.length) {
+          showMenu(published.filter(item => item.retirado !== true));
+          return;
+        }
       } catch (error) {
         console.warn('No se pudo leer el catálogo publicado.', error);
-        try {
-          const response = await fetch('data/menu-inicial.json', {signal: AbortSignal.timeout(5000)});
-          if (!response.ok) throw new Error(`Catálogo HTTP ${response.status}`);
-          showMenu(await response.json());
-        } catch (fallbackError) {
-          console.warn('No se pudo leer la copia de la carta.', fallbackError);
-          status.textContent = 'No pudimos cargar la carta. Puedes volver a intentarlo o llamarnos.';
-          retry.hidden = false;
-        }
+      }
+      try {
+        const response = await fetch('data/menu-inicial.json', {signal: AbortSignal.timeout(5000)});
+        if (!response.ok) throw new Error(`Catálogo HTTP ${response.status}`);
+        showMenu(await response.json());
+      } catch (error) {
+        console.warn('No se pudo leer la carta inicial.', error);
+        status.textContent = 'No pudimos cargar la carta. Puedes volver a intentarlo o llamarnos.';
+        retry.hidden = false;
       }
     }
 

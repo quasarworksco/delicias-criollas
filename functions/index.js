@@ -28,7 +28,7 @@ exports.crearPedido = onRequest({cors:true, maxInstances:5}, async (req,res) => 
       const docs = await tx.getAll(...productos.map(i => db.collection('menuPublico').doc(i.id)));
       const lineas = docs.map((doc,i) => {
         const data = doc.data();
-        if (!data || typeof data.nombre !== 'string' || !Number.isSafeInteger(data.precioCentavos) || data.precioCentavos < 0) invalid();
+        if (!data || data.retirado === true || typeof data.nombre !== 'string' || !Number.isSafeInteger(data.precioCentavos) || data.precioCentavos < 0) invalid();
         return {nombre:data.nombre, precio:data.precioCentavos, cantidad:productos[i].cantidad};
       });
       const total = lineas.reduce((n,i) => n+i.precio*i.cantidad,0);
