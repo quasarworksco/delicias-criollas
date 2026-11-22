@@ -83,8 +83,18 @@
     address{font-style:normal;margin-top:.75rem;color:#ffffff}
     .footer{background:#080808;color:#ffffff;font-size:.88rem;padding-block:1.3rem}
     .footer .wrap{display:flex;justify-content:space-between;gap:.45rem 1.25rem;flex-wrap:wrap;padding-right:3rem}
-    .floating{position:fixed;right:max(1rem,env(safe-area-inset-right));bottom:max(1rem,env(safe-area-inset-bottom));z-index:2;width:54px;height:54px;display:grid;place-items:center;border-radius:50%;background:#003893;color:white;border:1px solid #ffffff;box-shadow:0 5px 16px #0008}
-    .floating .icon{width:24px;height:24px}
+    .floating{position:fixed;right:calc(1rem + env(safe-area-inset-right));bottom:calc(1rem + env(safe-area-inset-bottom));z-index:10;display:inline-flex;align-items:center;justify-content:center;gap:.55rem;min-height:54px;padding:0 1.15rem;border:2px solid white;border-radius:99px;background:#087448;color:white;font-weight:700;text-decoration:none;box-shadow:0 8px 24px #0005,0 2px 6px #0003;animation:contact-enter 400ms var(--ease) backwards;transition:transform 180ms var(--ease)}
+    .floating .icon{width:26px;height:26px}
+    @keyframes contact-enter{from{opacity:.35;transform:translateY(12px)}}
+    @media(hover:hover){.floating:hover{transform:translateY(-3px);background:#05673e}}
+    .floating:active{transform:scale(.96)}
+    .footer{padding-bottom:calc(4.75rem + env(safe-area-inset-bottom))}
+    @media(max-width:38rem){.floating{width:56px;height:56px;padding:0}.floating span{display:none}}
+    .section-ribbon{position:relative;z-index:1;height:5px;background:#151515;overflow:hidden}
+    .section-ribbon::after{content:"";display:block;width:100%;height:100%;background:linear-gradient(115deg,#fc0 0 37%,#003893 37% 66%,#cf142b 66%);transform-origin:left}
+    .section-ribbon.reveal::after{animation:ribbon-enter 650ms var(--ease)}
+    @keyframes ribbon-enter{from{transform:scaleX(.04)}to{transform:scaleX(1)}}
+
     @media(hover:hover){.button:hover{background:#ffdf54}.filters button:not([aria-pressed="true"]):hover,.retry:hover{background:#343434}}
     @media(max-width:38rem){
       .top{min-height:68px}.brand span{display:none}.hero{align-items:end;min-height:33rem}
@@ -162,6 +172,7 @@
         <a href="tel:+13853846868"><svg class="icon" aria-hidden="true"><use href="#phone"/></svg>(385) 384-6868</a>
       </div>
     </div>
+    <div class="section-ribbon" aria-hidden="true"></div>
     <section class="wrap menu" id="menu" aria-labelledby="menu-title">
       <div class="menu-heading">
         <h2 id="menu-title">La carta</h2>
@@ -173,6 +184,7 @@
       <div class="grid dish-list" id="dishes"></div>
       <noscript>Activa JavaScript para consultar la carta.</noscript>
     </section>
+    <div class="section-ribbon" aria-hidden="true"></div>
     <section class="visit" id="visitanos" aria-labelledby="visit-title">
       <div class="wrap">
         <div><h2 id="visit-title">Visítanos</h2><address>2922 N 39th Ave<br>Phoenix, AZ 85019</address></div>
@@ -180,7 +192,7 @@
       </div>
     </section>
   </main>
-  <a class="floating" href="https://wa.me/13853846868" aria-label="Escribir a Delicias Criollas por WhatsApp"><svg class="icon" aria-hidden="true"><use href="#chat"/></svg></a>
+  <a class="floating" href="https://wa.me/13853846868" aria-label="Escribir a Delicias Criollas por WhatsApp"><svg class="icon" aria-hidden="true"><use href="#chat"/></svg><span>WhatsApp</span></a>
   <footer class="footer"><div class="wrap"><span>© 2026 Delicias Criollas</span><a href="https://dgpglobalgroup.com">Diseñado por DGP Global Group</a></div></footer>
   <dialog id="cart" aria-labelledby="cart-title">
     <button type="button" id="close-cart">Cerrar</button>
@@ -447,6 +459,16 @@
 
     search.addEventListener('input', () => render());
     retry.addEventListener('click', loadMenu);
+    if ('IntersectionObserver' in window) {
+      const ribbons = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.add('reveal');
+          ribbons.unobserve(entry.target);
+        }
+      });
+      document.querySelectorAll('.section-ribbon').forEach(ribbon => ribbons.observe(ribbon));
+    }
     loadMenu();
   </script>
 </body>
