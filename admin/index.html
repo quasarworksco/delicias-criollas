@@ -21,6 +21,26 @@
 </div><div class="actions"><button>Guardar producto</button><button type="reset">Limpiar</button></div></form>
 </div></main>
 <script type="module">
+import {inicial} from '../data/catalogo.js';
+try {
+  const entries = await inicial;
+  const list = document.querySelector('#products');
+  if (!list.dataset.connected) {
+    list.replaceChildren(...entries.map(p => {
+      const row = document.createElement('article');
+      const image = new Image();
+      image.src = '../assets/platos/'+p.id+'.webp';
+      image.alt = '';
+      const name = document.createElement('strong');
+      name.textContent = p.nombre+' · $'+(p.precioCentavos/100).toFixed(2);
+      row.append(image,name);
+      return row;
+    }));
+  }
+} catch { document.querySelector('#message').textContent = 'No se pudo cargar la carta inicial.'; }
+</script>
+<script type="module">
+import {inicial, combinar} from '../data/catalogo.js';
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import {getFirestore,collection,doc,setDoc,updateDoc,onSnapshot,query,orderBy,runTransaction} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 const app=initializeApp({apiKey:'AIzaSyCcE1vtt4laxA_CRNKqFxu4RDr36cYeiRE',authDomain:'delicias-9c0b0.firebaseapp.com',projectId:'delicias-9c0b0',appId:'1:533374986764:web:9a29287e6b49b21d8c5c29'});
@@ -46,9 +66,13 @@ function renderOrders(){
 setInterval(renderOrders,60000);
 form.onreset=()=>{editId=null;$('editing').textContent='Nuevo producto';};
 onSnapshot(query(collection(db,'pedidosPanel'),orderBy('creado','desc')),snap=>{receipts=snap.docs;renderOrders();},fail);
-  onSnapshot(collection(db,'menuPublico'),snap=>{
-    $('products').replaceChildren(...snap.docs.filter(d=>d.data().retirado !== true).map(d=>{
-      const row=document.createElement('article'),p=d.data(),name=document.createElement('strong');
+  onSnapshot(collection(db,'menuPublico'),async snap=>{
+    const publicados=snap.docs.map(d=>({...d.data(),id:d.id}));
+    const base=await inicial.catch(()=>[]);
+    $('products').dataset.connected='true';
+    $('products').replaceChildren(...combinar(base,publicados).map(p=>{
+      const d={id:p.id,ref:doc(db,'menuPublico',p.id)};
+      const row=document.createElement('article'),name=document.createElement('strong');
       name.textContent=p.nombre+' · $'+(p.precioCentavos/100).toFixed(2)+' ';
       const image=document.createElement('img');
       image.alt='';image.loading='lazy';
@@ -58,12 +82,14 @@ onSnapshot(query(collection(db,'pedidosPanel'),orderBy('creado','desc')),snap=>{
       row.append(image,name,button('Editar',()=>{editId=d.id;$('editing').textContent='Editar producto';
         for(const field of ['nombre','categoria','descripcion','promocion','orden','fotoPublicId'])form.elements[field].value=p[field]??'';
         form.precio.value=(p.precioCentavos/100).toFixed(2);form.nombre.focus();}),
-        button('Quitar',async()=>{if(confirm('¿Quitar '+p.nombre+' de la carta?'))try{await updateDoc(d.ref,{retirado:true});if(editId===d.id)form.reset();}catch{fail();}}));return row;
+        button('Quitar',async()=>{if(confirm('¿Quitar '+p.nombre+' de la carta?'))try{await setDoc(d.ref,{...p,retirado:true},{merge:true});if(editId===d.id)form.reset();}catch{fail();}}));return row;
     }));
   },fail);
 form.onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(form));data.precioCentavos=Math.round(Number(data.precio)*100);delete data.precio;data.orden=Number(data.orden||999);
   try{const ref=editId?doc(db,'menuPublico',editId):doc(collection(db,'menuPublico'));await setDoc(ref,data,{merge:true});form.reset();message('Producto guardado.');}catch{fail();}};
-$('seed').onclick=async()=>{try{const res=await fetch('../data/menu-inicial.json');if(!res.ok)throw Error();const entries=await res.json();
+async function cargarInicial(){try{const entries=await inicial;
   await runTransaction(db,async tx=>{const refs=entries.map(p=>doc(db,'menuPublico',p.id));const docs=await Promise.all(refs.map(ref=>tx.get(ref)));
-    entries.forEach(({id,...data},i)=>{if(!docs[i].exists())tx.set(refs[i],data);});});message('Catálogo inicial cargado.');}catch{fail();}};
+    entries.forEach(({id,...data},i)=>{if(!docs[i].exists())tx.set(refs[i],data);});});message('Catálogo inicial cargado.');}catch{fail();}}
+$('seed').onclick=cargarInicial;
+cargarInicial();
 </script></body></html>

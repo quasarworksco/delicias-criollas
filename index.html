@@ -209,6 +209,7 @@
     <a id="send-order" hidden target="_blank" rel="noopener">Enviar recibo por WhatsApp</a>
   </dialog>
   <script type="module">
+    import {inicial, combinar} from "./data/catalogo.js";
     const project = 'delicias-9c0b0';
     const apiKey = 'AIzaSyCcE1vtt4laxA_CRNKqFxu4RDr36cYeiRE';
     const cloud = 'do4fpfwlb';
@@ -353,22 +354,19 @@
     async function loadMenu() {
       retry.hidden = true;
       status.textContent = 'Cargando la carta…';
+      let base = [];
       try {
-        const published = await fetchPublishedMenu();
-        if (published.length) {
-          showMenu(published.filter(item => item.retirado !== true));
-          return;
-        }
+        base = await inicial;
+        showMenu(base);
       } catch (error) {
-        console.warn('No se pudo leer el catálogo publicado.', error);
+        console.warn(error);
       }
       try {
-        const response = await fetch('data/menu-inicial.json', {signal: AbortSignal.timeout(5000)});
-        if (!response.ok) throw new Error(`Catálogo HTTP ${response.status}`);
-        showMenu(await response.json());
+        const published = await fetchPublishedMenu();
+        showMenu(combinar(base, published));
       } catch (error) {
-        console.warn('No se pudo leer la carta inicial.', error);
-        status.textContent = 'No pudimos cargar la carta. Puedes volver a intentarlo o llamarnos.';
+        if (base.length) return;
+        status.textContent = 'No pudimos cargar la carta. Inténtalo otra vez.';
         retry.hidden = false;
       }
     }
