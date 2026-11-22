@@ -38,8 +38,8 @@
     nav a{display:grid;align-items:center;min-height:44px;text-decoration:none}
     nav a:hover,.footer a:hover{text-decoration:underline}
     .hero{display:grid;align-items:center;min-height:clamp(34rem,75svh,52rem);color:var(--paper);position:relative;isolation:isolate;background:var(--dark);overflow:hidden}
-    .hero img,.hero::after{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
-    .hero img{object-fit:cover;object-position:61% center}
+    .hero > img,.hero::after{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+    .hero > img{object-fit:cover;object-position:61% center}
     .hero::after{content:"";background:linear-gradient(90deg,#000000f5 1%,#000000db 28%,#00000060 59%,#0000000d 100%)}
     .hero-copy{padding-block:4rem;animation:arrive 560ms var(--ease) both}
     @keyframes arrive{from{opacity:.55;transform:translateY(12px)}}
@@ -88,13 +88,13 @@
     @media(hover:hover){.button:hover{background:#ffdf54}.filters button:not([aria-pressed="true"]):hover,.retry:hover{background:#343434}}
     @media(max-width:38rem){
       .top{min-height:68px}.brand span{display:none}.hero{align-items:end;min-height:33rem}
-      .hero img{object-position:65% center}.hero::after{background:linear-gradient(0deg,#000000fa 0%,#000000bd 39%,#0000001f 82%)}
+      .hero > img{object-position:65% center}.hero::after{background:linear-gradient(0deg,#000000fa 0%,#000000bd 39%,#0000001f 82%)}
       .hero-copy{padding-bottom:2.9rem}.location-strip .wrap{gap:0}
     }
     header{position:relative}
     header::after{content:"";position:absolute;bottom:0;left:0;width:100%;height:4px;background:linear-gradient(to right,#ffcc00 0 33.333%,#003893 33.333% 66.666%,#cf142b 66.666%);transform-origin:left;animation:tricolor 680ms var(--ease) both}
     @keyframes tricolor{from{transform:scaleX(0)}}
-    .hero img{filter:grayscale(1);animation:encuadre 950ms var(--ease) both}
+    .hero > img{filter:grayscale(1);animation:encuadre 950ms var(--ease) both}
     @keyframes encuadre{from{transform:scale(1.035)}}
     .dish{background:#fff;color:#101010;border-color:#fff}
     .dish p{color:#424242}
@@ -102,6 +102,14 @@
     .dish-promotion{background:#cf142b;color:#fff;border-color:#cf142b}
     .button .icon{transition:transform 180ms var(--ease)}
     @media(hover:hover){.button:hover .icon{transform:translateX(3px)}}
+    .hero-logo{display:block;width:clamp(14rem,32vw,24rem);height:auto;max-width:100%}
+    .menu{color-scheme:light;background:#fff;color:#111;--muted:#454545;--line:#d5d5d5;box-shadow:0 0 0 100vmax white;clip-path:inset(0 -100vmax)}
+    .menu-group h3{color:#111}
+    .search input{background:white}
+    .search-field .icon{color:#003893}
+    .menu :focus-visible{outline-color:#003893}
+    .dish{border-color:#d5d5d5}
+    .filters button:not([aria-pressed="true"]):hover,.retry:hover{background:#eee;color:#111}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
   </style>
 </head>
@@ -116,7 +124,7 @@
   </svg>
   <header>
     <div class="top wrap">
-      <a class="brand" href="#inicio" aria-label="Delicias Criollas, inicio"><img src="assets/logo.jpg" width="61" height="44" alt=""><span>Delicias Criollas</span></a>
+      <a class="brand" href="#inicio" aria-label="Delicias Criollas, inicio"><img src="assets/logo-marca.webp" width="61" height="44" alt=""><span>Delicias Criollas</span></a>
       <nav aria-label="Principal"><a href="#menu">La carta</a><a href="#visitanos">Visítanos</a></nav>
     </div>
   </header>
@@ -124,7 +132,7 @@
     <section class="hero" aria-labelledby="title">
       <img src="assets/menu-portada.webp" width="1672" height="941" alt="" fetchpriority="high">
       <div class="wrap hero-copy">
-        <h1 id="title">Delicias<br>Criollas</h1>
+        <h1 id="title"><img class="hero-logo" src="assets/logo-marca.webp" width="760" height="507" alt="Delicias Criollas"></h1>
         <p>Cocina venezolana en Phoenix, Arizona</p>
         <a class="button" href="#menu">Explorar la carta <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></a>
       </div>
