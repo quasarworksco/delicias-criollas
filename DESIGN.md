@@ -1,5 +1,5 @@
 # Delicias Criollas
 
-La portada negra presenta el logo completo a color sobre la fotografía monocromática. La carta ocupa una sección blanca y la ubicación cierra sobre fondo oscuro. El amarillo identifica la categoría activa y las acciones principales, el azul destaca los precios y la ubicación, y el rojo distingue las promociones. La fotografía monocromática reserva el color para el menú y el logo venezolano.
+La portada combina fotografía gastronómica a color, logo completo y una placa oscura de vidrio translúcido. Barlow Condensed destaca los nombres de los platos y Manrope se usa para precios, ingredientes y controles.
 
-La franja tricolor se despliega al entrar. La fotografía se acerca suavemente a su encuadre y el grupo de platos aparece al elegir una categoría. Las animaciones respetan la preferencia de movimiento reducido. Los filtros indican su selección con aria-pressed y la búsqueda anuncia los resultados.
+La carta blanca presenta una lista de tarjetas con foto. Las categorías se mantienen arriba al recorrer los productos y permiten desplazamiento horizontal en móvil. El amarillo distingue la selección, el azul señala los precios y el rojo las promociones. Las animaciones respetan la preferencia de movimiento reducido.

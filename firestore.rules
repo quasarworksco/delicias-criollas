@@ -1,10 +1,20 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /menuPublico/{platoId} {
-      allow get, list: if true;
-      allow create, update, delete: if false;
+    function admin() {
+      return request.auth != null && exists(/databases/$(database)/documents/administradores/$(request.auth.uid));
+    }
+    match /menuPublico/{id} {
+      allow read: if true;
+      allow create, update: if admin() && request.resource.data.nombre is string
+        && request.resource.data.categoria is string && request.resource.data.precioCentavos is int
+        && request.resource.data.precioCentavos >= 0;
+      allow delete: if admin();
+    }
+    match /pedidos/{id} {
+      allow read: if admin();
+      allow update: if admin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado'])
+        && request.resource.data.estado in ['Nuevo','En preparación','Listo','Entregado','Cancelado'];
     }
   }
 }
