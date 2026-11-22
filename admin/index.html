@@ -1,10 +1,25 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Administración · Delicias Criollas</title>
-<style>*{box-sizing:border-box}body{margin:0;background:#f6f7f9;color:#14161b;font:1rem/1.5 system-ui}header{display:flex;align-items:center;gap:1rem;background:#101010;color:white;border-bottom:4px solid #ffcc00;padding:.8rem max(1rem,5vw)}header img{width:70px}main{max-width:64rem;margin:auto;padding:1rem}section,article,form{background:white;border-radius:.7rem;margin:1rem 0;padding:1rem;border:1px solid #ddd}label{display:grid;gap:.3rem;margin:.55rem 0}input,button,select,textarea{font:inherit;padding:.55rem;min-height:44px}button{cursor:pointer;margin:.2rem;background:#ffcc00;border:0;border-radius:.4rem;color:#111}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}[hidden]{display:none!important}header{background:#101010;border-image:linear-gradient(90deg,#ffcc00 33%,#003893 33% 67%,#cf142b 67%) 1}header a{margin-left:auto;color:white}h1,h2{letter-spacing:-.035em}h1{font-size:clamp(1.25rem,4vw,2rem)}section{padding:clamp(1rem,4vw,2.4rem);border-radius:1rem}button:focus-visible,a:focus-visible{outline:3px solid #004bcc}#message:empty{display:none}</style></head>
-<body><header><img src="../assets/logo-marca.webp" alt="Delicias Criollas"><h1>Administración</h1><a href="../">Ver la carta</a></header><main><p role="status" id="message"></p>
-
-<div id="panel"><section><h2>Pedidos recientes</h2><div id="orders"></div></section>
-<section><h2>Productos</h2><button id="seed">Cargar los productos iniciales que falten</button><div id="products"></div>
-<form id="editor"><h3 id="editing">Nuevo producto</h3><label>Nombre<input name="nombre" required></label><label>Categoría<input name="categoria" required></label><label>Precio en USD<input name="precio" type="number" min="0" step=".01" required></label><label>Descripción<textarea name="descripcion"></textarea></label><label>Promoción<input name="promocion"></label><label>Orden<input name="orden" type="number" min="0" step="1"></label><label>ID público de la foto en Cloudinary<input name="fotoPublicId"></label><button>Guardar producto</button><button type="reset">Limpiar</button></form></section></div></main>
+<link rel="icon" href="../assets/logo-marca.webp">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="panel.css"></head>
+<body>
+<header><div class="mast"><img src="../assets/logo-marca.webp" alt="Delicias Criollas"><h1>Administración</h1><a href="../">Ver la carta</a></div></header>
+<nav aria-label="Secciones"><div><a href="#pedidos">Pedidos</a><a href="#catalogo">Productos</a><a href="#editor">Editor de producto</a></div></nav>
+<main><p role="status" id="message"></p>
+<section id="pedidos"><h2>Pedidos recientes</h2><div id="orders"></div></section>
+<div class="workspace">
+<section id="catalogo"><div class="section-head"><h2>Productos</h2><button id="seed" title="Cargar los productos iniciales que falten">Cargar catálogo inicial</button></div><div id="products"></div></section>
+<form id="editor"><div class="editor-head"><h2 id="editing">Nuevo producto</h2></div>
+<div class="fields">
+<label class="wide">Nombre del producto<input name="nombre" required></label>
+<label>Categoría<input name="categoria" required></label>
+<label>Precio en USD<input name="precio" type="number" min="0" step=".01" required></label>
+<label class="wide">Descripción<textarea name="descripcion" rows="2"></textarea></label>
+<label>Promoción<input name="promocion"></label>
+<label>Posición en la carta<input name="orden" type="number" min="0" step="1"></label>
+<label class="wide">Foto en Cloudinary<input name="fotoPublicId" placeholder="ID público de la imagen"></label>
+</div><div class="actions"><button>Guardar producto</button><button type="reset">Limpiar</button></div></form>
+</div></main>
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import {getFirestore,collection,doc,setDoc,updateDoc,deleteDoc,onSnapshot,query,orderBy,runTransaction} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
@@ -35,7 +50,12 @@ onSnapshot(query(collection(db,'pedidosPanel'),orderBy('creado','desc')),snap=>{
     $('products').replaceChildren(...snap.docs.map(d=>{
       const row=document.createElement('article'),p=d.data(),name=document.createElement('strong');
       name.textContent=p.nombre+' · $'+(p.precioCentavos/100).toFixed(2)+' ';
-      row.append(name,button('Editar',()=>{editId=d.id;$('editing').textContent='Editar producto';
+      const image=document.createElement('img');
+      image.alt='';image.loading='lazy';
+      image.src=p.fotoPublicId ? 'https://res.cloudinary.com/do4fpfwlb/image/upload/f_auto,q_auto,c_fill,w_128,h_128/'+String(p.fotoPublicId).split('/').map(encodeURIComponent).join('/') :
+        /^plato-(0[1-9]|1[0-6])$/.test(d.id) ? '../assets/platos/'+d.id+'.webp' : '../assets/logo-marca.webp';
+      image.onerror=()=>{image.onerror=null;image.src='../assets/logo-marca.webp';};
+      row.append(image,name,button('Editar',()=>{editId=d.id;$('editing').textContent='Editar producto';
         for(const field of ['nombre','categoria','descripcion','promocion','orden','fotoPublicId'])form.elements[field].value=p[field]??'';
         form.precio.value=(p.precioCentavos/100).toFixed(2);form.nombre.focus();}),
         button('Quitar',async()=>{if(confirm('¿Quitar '+p.nombre+' de la carta?'))try{await deleteDoc(d.ref);if(editId===d.id)form.reset();}catch{fail();}}));return row;
