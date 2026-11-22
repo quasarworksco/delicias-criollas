@@ -1,74 +1,329 @@
 <!doctype html>
-<!--
-  Delicias Criollas · sitio en construcción por DGP Global Group.
-  Para Codex o Claude: lee AGENTS.md y CONTEXTO-DGP.md antes de empezar.
--->
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Delicias Criollas · Próximamente</title>
-<meta name="robots" content="noindex">
-<meta name="theme-color" content="#0b1020">
-<link rel="icon" href="assets/logo.jpg">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root { --bg:#0b1020; --tx:#eef2ff; --tx2:#a3acc8; --ln:rgba(255,255,255,.1); --a1:#4f6bff; --a2:#22d3ee; }
-  * { box-sizing:border-box; }
-  html, body { height:100%; }
-  body { margin:0; min-height:100vh; display:grid; place-items:center; align-content:center; padding:28px 18px; background:var(--bg); color:var(--tx);
-    font-family:'Plus Jakarta Sans',system-ui,-apple-system,"Segoe UI",sans-serif; overflow-x:hidden; -webkit-font-smoothing:antialiased; }
-  /* luz de fondo que se mueve despacio */
-  .fondo { position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
-  .fondo i { position:absolute; border-radius:50%; filter:blur(70px); opacity:.55; }
-  .fondo i:nth-child(1) { width:55vmax; height:55vmax; left:-18vmax; top:-22vmax; background:radial-gradient(circle,var(--a1),transparent 65%); animation:flota 22s ease-in-out infinite alternate; }
-  .fondo i:nth-child(2) { width:45vmax; height:45vmax; right:-16vmax; bottom:-20vmax; background:radial-gradient(circle,var(--a2),transparent 65%); opacity:.35; animation:flota 28s ease-in-out infinite alternate-reverse; }
-  .fondo::after { content:''; position:absolute; inset:0; background-image:linear-gradient(var(--ln) 1px,transparent 1px),linear-gradient(90deg,var(--ln) 1px,transparent 1px); background-size:56px 56px;
-    mask-image:radial-gradient(ellipse at center,#000 10%,transparent 70%); -webkit-mask-image:radial-gradient(ellipse at center,#000 10%,transparent 70%); opacity:.35; }
-  main { width:100%; max-width:560px; text-align:center; }
-  .logo { display:block; max-width:200px; max-height:120px; object-fit:contain; margin:0 auto 30px; filter:drop-shadow(0 12px 30px rgba(0,0,0,.35)); animation:sube .8s cubic-bezier(.23,1,.32,1) both; }
-  .chip { display:inline-flex; align-items:center; gap:8px; padding:7px 14px; border-radius:40px; border:1px solid var(--ln); background:rgba(255,255,255,.04);
-    font-size:12.5px; font-weight:600; letter-spacing:.04em; color:var(--tx2); animation:sube .8s .08s cubic-bezier(.23,1,.32,1) both; }
-  .chip b { width:8px; height:8px; border-radius:50%; background:var(--a2); box-shadow:0 0 0 0 rgba(34,211,238,.6); animation:late 2s ease-out infinite; }
-  h1 { font-size:clamp(34px,7vw,58px); line-height:1.05; letter-spacing:-.035em; font-weight:800; margin:22px 0 14px; animation:sube .8s .14s cubic-bezier(.23,1,.32,1) both;
-    background:linear-gradient(120deg,#fff 30%,#c7d2fe 60%,#a5f3fc); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  p { margin:0 auto; max-width:440px; color:var(--tx2); font-size:16.5px; line-height:1.65; animation:sube .8s .2s cubic-bezier(.23,1,.32,1) both; }
-  .barra { position:relative; width:min(320px,80%); height:6px; margin:34px auto 0; border-radius:10px; background:rgba(255,255,255,.08); overflow:hidden; animation:sube .8s .26s cubic-bezier(.23,1,.32,1) both; }
-  .barra::before { content:''; position:absolute; inset:0; width:68%; border-radius:inherit; background:linear-gradient(90deg,var(--a1),var(--a2)); }
-  .barra::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent); transform:translateX(-100%); animation:brillo 2.4s ease-in-out infinite; }
-  .acciones { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:34px; animation:sube .8s .32s cubic-bezier(.23,1,.32,1) both; }
-  .btn { display:inline-flex; align-items:center; gap:9px; min-height:46px; padding:0 20px; border-radius:14px; font-weight:600; font-size:14.5px; text-decoration:none; color:var(--tx);
-    border:1px solid var(--ln); background:rgba(255,255,255,.05); transition:transform .2s cubic-bezier(.23,1,.32,1), background .2s ease, border-color .2s ease; }
-  .btn:hover { transform:translateY(-2px); background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.2); }
-  .btn:focus-visible { outline:2px solid var(--a2); outline-offset:3px; }
-  .btn.pri { background:linear-gradient(135deg,var(--a1),#3b82f6); border-color:transparent; box-shadow:0 12px 30px -12px rgba(79,107,255,.8); }
-  .en { margin-top:26px; font-size:13.5px; color:var(--tx2); opacity:.8; animation:sube .8s .38s cubic-bezier(.23,1,.32,1) both; }
-  footer { margin-top:46px; font-size:12px; animation:sube .8s .44s cubic-bezier(.23,1,.32,1) both; }
-  footer a { display:inline-flex; align-items:center; gap:8px; padding:7px 13px; border-radius:30px; color:var(--tx2); font-weight:600; text-decoration:none; transition:background .2s ease, color .2s ease; }
-  footer a:hover, footer a:focus-visible { background:rgba(255,255,255,.07); color:var(--tx); outline:none; }
-  footer img { width:18px; height:18px; border-radius:5px; }
-  @keyframes sube { from { opacity:0; transform:translateY(14px); } }
-  @keyframes flota { to { transform:translate(8vmax,6vmax) scale(1.1); } }
-  @keyframes late { 70%,100% { box-shadow:0 0 0 10px rgba(34,211,238,0); } }
-  @keyframes brillo { to { transform:translateX(100%); } }
-  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101010">
+  <title>Menú venezolano en Phoenix | Delicias Criollas</title>
+  <meta name="description" content="Explora la carta de Delicias Criollas, restaurante venezolano en Phoenix, Arizona.">
+  <meta property="og:title" content="Delicias Criollas | Cocina venezolana en Phoenix">
+  <meta property="og:description" content="La carta de Delicias Criollas y cómo llegar al restaurante.">
+  <meta property="og:image" content="https://deliciascriollas.dgp-link.com/assets/menu-portada.webp">
+  <link rel="icon" href="assets/logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"Restaurant","name":"Delicias Criollas","servesCuisine":"Venezolana","telephone":"+1-385-384-6868","url":"https://deliciascriollas.dgp-link.com/","hasMenu":"https://deliciascriollas.dgp-link.com/#menu","address":{"@type":"PostalAddress","streetAddress":"2922 N 39th Ave","addressLocality":"Phoenix","addressRegion":"AZ","postalCode":"85019","addressCountry":"US"}}
+  </script>
+  <style>
+    :root{color-scheme:dark;--paper:#ffffff;--ink:#ffffff;--muted:#cccccc;--gold:#ffcc00;--dark:#101010;--surface:#202020;--line:#444444;--display:"Playfair Display",Georgia,serif;--ease:cubic-bezier(.23,1,.32,1)}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--dark);color:var(--ink);font:400 1rem/1.55 "DM Sans",system-ui,sans-serif}
+    [hidden]{display:none!important}
+    a{color:inherit;text-underline-offset:.22em}
+    button,input{font:inherit;color:inherit}
+    button{cursor:pointer}
+    :focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+    ::selection{background:var(--gold);color:var(--dark)}
+    .wrap{width:min(100% - 2.5rem,72rem);margin-inline:auto}
+    .skip{position:absolute;top:1rem;left:1rem;z-index:5;transform:translateY(-180%);background:var(--gold);color:var(--dark);padding:.75rem 1rem}
+    .skip:focus{transform:none}
+    header{background:#080808;color:var(--paper);border-bottom:1px solid #333333}
+    .top{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;font:600 1.06rem var(--display)}
+    .brand img{width:61px;height:44px;object-fit:contain}
+    nav{display:flex;align-items:center;gap:clamp(.85rem,3vw,2.4rem);font-size:.92rem}
+    nav a{display:grid;align-items:center;min-height:44px;text-decoration:none}
+    nav a:hover,.footer a:hover{text-decoration:underline}
+    .hero{display:grid;align-items:center;min-height:clamp(34rem,75svh,52rem);color:var(--paper);position:relative;isolation:isolate;background:var(--dark);overflow:hidden}
+    .hero img,.hero::after{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+    .hero img{object-fit:cover;object-position:61% center}
+    .hero::after{content:"";background:linear-gradient(90deg,#000000f5 1%,#000000db 28%,#00000060 59%,#0000000d 100%)}
+    .hero-copy{padding-block:4rem;animation:arrive 560ms var(--ease) both}
+    @keyframes arrive{from{opacity:.55;transform:translateY(12px)}}
+    h1,h2,h3,p{margin:0}
+    h1,h2,h3{font-family:var(--display);line-height:1.05;text-wrap:balance}
+    h1{font-size:clamp(3.8rem,8.1vw,6rem);font-weight:600;letter-spacing:-.035em}
+    .hero p{font-size:clamp(1.04rem,2vw,1.25rem);color:#ffffff;margin:1.35rem 0 2rem}
+    .button{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;min-height:48px;padding:.65rem 1.1rem;border:1px solid transparent;border-radius:.4rem;background:var(--gold);color:var(--dark);font-weight:700;text-decoration:none;transition:background 180ms var(--ease),transform 180ms var(--ease)}
+    .button:active{transform:translateY(1px)}
+    .icon{width:1.15rem;height:1.15rem;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+    .location-strip{background:#003893;color:var(--paper);border-block:1px solid #003893}
+    .location-strip .icon{color:var(--gold)}
+    .location-strip .wrap{display:flex;align-items:center;justify-content:space-between;gap:.6rem 1.5rem;min-height:70px;padding-block:.65rem;flex-wrap:wrap}
+    .location-strip a{display:inline-flex;gap:.55rem;align-items:center;min-height:44px;font-weight:600}
+    .menu{padding-block:clamp(3.25rem,7vw,6rem);scroll-margin-top:1rem;min-height:32rem}
+    .menu h2,.visit h2{font-size:clamp(2.8rem,6vw,4.8rem);font-weight:600;letter-spacing:-.035em}
+    .menu-heading{display:flex;justify-content:space-between;align-items:end;gap:1rem 2rem;flex-wrap:wrap;padding-bottom:1.55rem;border-bottom:1px solid var(--line)}
+    .search{display:grid;gap:.35rem;width:min(100%,21rem);font-size:.9rem;font-weight:600}
+    .search-field{position:relative}
+    .search-field .icon{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--gold);pointer-events:none}
+    .search input{width:100%;background:var(--surface);border:1px solid #888888;border-radius:.4rem;min-height:46px;padding:.55rem .8rem .55rem 2.5rem}
+    .search input::placeholder{color:var(--muted);opacity:1}
+    .filters{display:flex;gap:.55rem;flex-wrap:wrap;margin-block:1.3rem}
+    .filters button,.retry{background:transparent;border:1px solid #888888;border-radius:2rem;padding:.55rem 1rem;min-height:44px;font-size:.88rem;font-weight:600;transition:background 180ms var(--ease)}
+    .filters button[aria-pressed="true"]{background:var(--gold);color:var(--dark);border-color:var(--gold)}
+    .status{margin:1.4rem 0 2rem;color:var(--muted);font-size:.9rem}
+    .menu-group + .menu-group{margin-top:clamp(2rem,5vw,4rem)}
+    .menu-group h3{display:flex;align-items:center;gap:1rem;color:var(--gold);font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:1.1rem}
+    .menu-group h3::after{content:"";height:1px;background:var(--line);flex:1}
+    .dish-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:.75rem 1rem}
+    .dish{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:.55rem;overflow:hidden;background:var(--surface)}
+    .dish img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--dark)}
+    .dish-copy{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:.45rem .8rem;padding:1.25rem}
+    .dish h4{margin:0;font:600 clamp(1.12rem,2.5vw,1.38rem)/1.28 var(--display);overflow-wrap:anywhere}
+    .dish p{grid-row:2;grid-column:1/-1;color:var(--muted);font-size:.95rem}
+    .dish-price{grid-row:1;grid-column:2;color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap}
+    .dish-promotion{grid-column:1/-1;justify-self:start;border:1px solid #ffcc00;border-radius:.25rem;padding:.12rem .5rem;color:var(--gold);font-size:.83rem}
+    .grid.enter .menu-group{animation:arrive 230ms var(--ease) both}
+    .visit{background:var(--surface);color:var(--paper);border-block:1px solid var(--line);padding-block:3.25rem}
+    .visit .wrap{display:flex;justify-content:space-between;align-items:center;gap:1.6rem 2rem;flex-wrap:wrap}
+    address{font-style:normal;margin-top:.75rem;color:#ffffff}
+    .footer{background:#080808;color:#ffffff;font-size:.88rem;padding-block:1.3rem}
+    .footer .wrap{display:flex;justify-content:space-between;gap:.45rem 1.25rem;flex-wrap:wrap;padding-right:3rem}
+    .floating{position:fixed;right:max(1rem,env(safe-area-inset-right));bottom:max(1rem,env(safe-area-inset-bottom));z-index:2;width:54px;height:54px;display:grid;place-items:center;border-radius:50%;background:#003893;color:white;border:1px solid #ffffff;box-shadow:0 5px 16px #0008}
+    .floating .icon{width:24px;height:24px}
+    @media(hover:hover){.button:hover{background:#ffdf54}.filters button:not([aria-pressed="true"]):hover,.retry:hover{background:#343434}}
+    @media(max-width:38rem){
+      .top{min-height:68px}.brand span{display:none}.hero{align-items:end;min-height:33rem}
+      .hero img{object-position:65% center}.hero::after{background:linear-gradient(0deg,#000000fa 0%,#000000bd 39%,#0000001f 82%)}
+      .hero-copy{padding-bottom:2.9rem}.location-strip .wrap{gap:0}
+    }
+    header{position:relative}
+    header::after{content:"";position:absolute;bottom:0;left:0;width:100%;height:4px;background:linear-gradient(to right,#ffcc00 0 33.333%,#003893 33.333% 66.666%,#cf142b 66.666%);transform-origin:left;animation:tricolor 680ms var(--ease) both}
+    @keyframes tricolor{from{transform:scaleX(0)}}
+    .hero img{filter:grayscale(1);animation:encuadre 950ms var(--ease) both}
+    @keyframes encuadre{from{transform:scale(1.035)}}
+    .dish{background:#fff;color:#101010;border-color:#fff}
+    .dish p{color:#424242}
+    .dish-price{color:#003893}
+    .dish-promotion{background:#cf142b;color:#fff;border-color:#cf142b}
+    .button .icon{transition:transform 180ms var(--ease)}
+    @media(hover:hover){.button:hover .icon{transform:translateX(3px)}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+  </style>
 </head>
-<body>
-  <div class="fondo" aria-hidden="true"><i></i><i></i></div>
-  <main>
-    <img class="logo" src="assets/logo.jpg" alt="Delicias Criollas">
-    <span class="chip"><b aria-hidden="true"></b>Muy pronto</span>
-    <h1>Delicias Criollas</h1>
-    <p>Estamos preparando nuestro nuevo sitio web. Muy pronto vas a poder conocer todo lo que tenemos para ti.</p>
-    <div class="barra" role="img" aria-label="Sitio en construcción"></div>
-    <div class="acciones">
-      <a class="btn pri" href="https://wa.me/13853846866" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/></svg>Escríbenos por WhatsApp</a>
-      
+<body id="inicio">
+  <a class="skip" href="#menu">Saltar a la carta</a>
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
+    <symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+    <symbol id="magnifier" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11s-7-6-7-11a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+    <symbol id="phone" viewBox="0 0 24 24"><path d="M6 3H4a1 1 0 0 0-1 1c0 9 8 17 17 17a1 1 0 0 0 1-1v-2l-5-2-2 2a15 15 0 0 1-8-8l2-2-2-5Z"/></symbol>
+    <symbol id="chat" viewBox="0 0 24 24"><path d="M21 11.5a9 9 0 0 1-13 8L3 21l1.5-5A9 9 0 1 1 21 11.5Z"/><path d="M8 8c0 4 4 8 8 8m-8-8 1.3-.6 1.3 2.1-1 1m6.4 5.5.6-1.3-2.1-1.3-1 1"/></symbol>
+  </svg>
+  <header>
+    <div class="top wrap">
+      <a class="brand" href="#inicio" aria-label="Delicias Criollas, inicio"><img src="assets/logo.jpg" width="61" height="44" alt=""><span>Delicias Criollas</span></a>
+      <nav aria-label="Principal"><a href="#menu">La carta</a><a href="#visitanos">Visítanos</a></nav>
     </div>
-    <p class="en" lang="en">Our new website is coming soon.</p>
-    <footer><a href="https://dgpglobalgroup.com" target="_blank" rel="noopener"><img src="https://adv.dgp-link.com/icon-192.png" alt="">Powered by DGP Global Group</a></footer>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="title">
+      <img src="assets/menu-portada.webp" width="1672" height="941" alt="" fetchpriority="high">
+      <div class="wrap hero-copy">
+        <h1 id="title">Delicias<br>Criollas</h1>
+        <p>Cocina venezolana en Phoenix, Arizona</p>
+        <a class="button" href="#menu">Explorar la carta <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></a>
+      </div>
+    </section>
+    <div class="location-strip">
+      <div class="wrap">
+        <a href="https://www.google.com/maps/dir/?api=1&amp;destination=2922+N+39th+Ave%2C+Phoenix%2C+AZ+85019"><svg class="icon" aria-hidden="true"><use href="#pin"/></svg>2922 N 39th Ave, Phoenix, AZ 85019</a>
+        <a href="tel:+13853846868"><svg class="icon" aria-hidden="true"><use href="#phone"/></svg>(385) 384-6868</a>
+      </div>
+    </div>
+    <section class="wrap menu" id="menu" aria-labelledby="menu-title">
+      <div class="menu-heading">
+        <h2 id="menu-title">La carta</h2>
+        <label class="search" hidden>Buscar en la carta<span class="search-field"><svg class="icon" aria-hidden="true"><use href="#magnifier"/></svg><input id="search" type="search" placeholder="Nombre o ingrediente"></span></label>
+      </div>
+      <div class="filters" id="filters" role="group" aria-label="Categorías" hidden></div>
+      <p class="status" id="menu-status" role="status">Cargando la carta…</p>
+      <button class="retry" id="retry" hidden>Intentar de nuevo</button>
+      <div class="grid" id="dishes"></div>
+      <noscript>Activa JavaScript para consultar la carta.</noscript>
+    </section>
+    <section class="visit" id="visitanos" aria-labelledby="visit-title">
+      <div class="wrap">
+        <div><h2 id="visit-title">Visítanos</h2><address>2922 N 39th Ave<br>Phoenix, AZ 85019</address></div>
+        <a class="button" href="https://www.google.com/maps/dir/?api=1&amp;destination=2922+N+39th+Ave%2C+Phoenix%2C+AZ+85019"><svg class="icon" aria-hidden="true"><use href="#pin"/></svg>Cómo llegar</a>
+      </div>
+    </section>
   </main>
+  <a class="floating" href="https://wa.me/13853846868" aria-label="Escribir a Delicias Criollas por WhatsApp"><svg class="icon" aria-hidden="true"><use href="#chat"/></svg></a>
+  <footer class="footer"><div class="wrap"><span>© 2026 Delicias Criollas</span><a href="https://dgpglobalgroup.com">Diseñado por DGP Global Group</a></div></footer>
+  <script type="module">
+    const project = 'delicias-9c0b0';
+    const apiKey = 'AIzaSyCcE1vtt4laxA_CRNKqFxu4RDr36cYeiRE';
+    const cloud = 'do4fpfwlb';
+    const menuUrl = `https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents/menuPublico`;
+    const search = document.querySelector('#search');
+    const filters = document.querySelector('#filters');
+    const grid = document.querySelector('#dishes');
+    const status = document.querySelector('#menu-status');
+    const retry = document.querySelector('#retry');
+    const currency = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'});
+    const collator = new Intl.Collator('es', {sensitivity: 'base'});
+    const normalize = value => value.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('es');
+    let dishes = [];
+    let category = null;
+
+    function readDish(record) {
+      const str = value => typeof value === 'string' ? value.trim() : '';
+      const name = str(record.nombre);
+      const section = str(record.categoria);
+      const cents = record.precioCentavos;
+      const order = record.orden;
+      if (!name || !section || !Number.isSafeInteger(cents) || cents < 0) return null;
+      return {
+        name, section, cents, description: str(record.descripcion), photo: str(record.fotoPublicId),
+        promotion: str(record.promocion),
+        order: Number.isSafeInteger(order) ? order : Number.MAX_SAFE_INTEGER
+      };
+    }
+
+    function makeDish(dish) {
+      const item = document.createElement('article');
+      item.className = 'dish';
+      if (/^[\w-]+(?:\/[\w-]+)*$/.test(dish.photo)) {
+        const image = new Image();
+        image.src = `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto,c_fill,w_720,h_540/${dish.photo}`;
+        image.alt = dish.name;
+        image.loading = 'lazy';
+        image.width = 720;
+        image.height = 540;
+        image.addEventListener('error', () => image.remove(), {once: true});
+        item.append(image);
+      }
+      const copy = document.createElement('div');
+      copy.className = 'dish-copy';
+      const title = document.createElement('h4');
+      title.textContent = dish.name;
+      copy.append(title);
+      if (dish.description) {
+        const description = document.createElement('p');
+        description.textContent = dish.description;
+        copy.append(description);
+      }
+      const price = document.createElement('strong');
+      price.className = 'dish-price';
+      price.textContent = currency.format(dish.cents / 100);
+      copy.append(price);
+      if (dish.promotion) {
+        const promotion = document.createElement('span');
+        promotion.className = 'dish-promotion';
+        promotion.textContent = dish.promotion;
+        copy.append(promotion);
+      }
+      item.append(copy);
+      return item;
+    }
+
+    function render(animate = false) {
+      const query = normalize(search.value.trim());
+      const results = dishes.filter(dish =>
+        (category === null || dish.section === category) &&
+        normalize(`${dish.name} ${dish.description} ${dish.section}`).includes(query)
+      );
+      const groups = new Map();
+      for (const dish of results) {
+        if (!groups.has(dish.section)) groups.set(dish.section, []);
+        groups.get(dish.section).push(dish);
+      }
+      grid.replaceChildren(...Array.from(groups, ([name, items]) => {
+        const group = document.createElement('section');
+        group.className = 'menu-group';
+        const heading = document.createElement('h3');
+        heading.textContent = name;
+        const list = document.createElement('div');
+        list.className = 'dish-list';
+        list.append(...items.map(makeDish));
+        group.append(heading, list);
+        return group;
+      }));
+      status.textContent = results.length
+        ? `${results.length} ${results.length === 1 ? 'plato' : 'platos'}`
+        : 'No encontramos platos con esa búsqueda.';
+      grid.classList.toggle('enter', animate);
+    }
+
+    function renderFilters() {
+      const categories = [...new Set(dishes.map(dish => dish.section))];
+      filters.replaceChildren(...[null, ...categories].map(section => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = section ?? 'Todos';
+        button.setAttribute('aria-pressed', String(section === category));
+        button.addEventListener('click', () => {
+          category = section;
+          for (const option of filters.children) option.setAttribute('aria-pressed', String(option === button));
+          render(true);
+        });
+        return button;
+      }));
+    }
+
+    function showMenu(records) {
+      dishes = records.map(readDish).filter(Boolean)
+        .sort((a, b) => a.order - b.order || collator.compare(a.name, b.name));
+      if (!dishes.some(dish => dish.section === category)) category = null;
+      search.closest('label').hidden = !dishes.length;
+      filters.hidden = !dishes.length;
+      if (!dishes.length) {
+        grid.replaceChildren();
+        status.textContent = records.length
+          ? 'La carta no está disponible por el momento.'
+          : 'Por ahora no hay platos publicados.';
+        return;
+      }
+      renderFilters();
+      render();
+    }
+
+    async function fetchPublishedMenu() {
+      const records = [];
+      const signal = AbortSignal.timeout(6500);
+      const params = new URLSearchParams({key: apiKey, pageSize: '100'});
+      do {
+        const response = await fetch(`${menuUrl}?${params}`, {signal});
+        if (!response.ok) throw new Error(`Firestore HTTP ${response.status}`);
+        const page = await response.json();
+        for (const {fields = {}} of page.documents ?? []) {
+          records.push(Object.fromEntries(Object.entries(fields).map(([key, value]) => [
+            key, value.stringValue ?? (value.integerValue === undefined ? undefined : Number(value.integerValue))
+          ])));
+        }
+        if (page.nextPageToken) params.set('pageToken', page.nextPageToken);
+        else params.delete('pageToken');
+      } while (params.has('pageToken'));
+      return records;
+    }
+
+    async function loadMenu() {
+      retry.hidden = true;
+      status.textContent = 'Cargando la carta…';
+      try {
+        showMenu(await fetchPublishedMenu());
+      } catch (error) {
+        console.warn('No se pudo leer el catálogo publicado.', error);
+        try {
+          const response = await fetch('data/menu-inicial.json', {signal: AbortSignal.timeout(5000)});
+          if (!response.ok) throw new Error(`Catálogo HTTP ${response.status}`);
+          showMenu(await response.json());
+        } catch (fallbackError) {
+          console.warn('No se pudo leer la copia de la carta.', fallbackError);
+          status.textContent = 'No pudimos cargar la carta. Puedes volver a intentarlo o llamarnos.';
+          retry.hidden = false;
+        }
+      }
+    }
+
+    search.addEventListener('input', () => render());
+    retry.addEventListener('click', loadMenu);
+    loadMenu();
+  </script>
 </body>
 </html>

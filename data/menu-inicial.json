@@ -1,0 +1,131 @@
+[
+  {
+    "id": "plato-01",
+    "nombre": "Combo Arepa de Carne Asada",
+    "categoria": "Arepas",
+    "descripcion": "2 arepas de carne asada más bebida",
+    "precioCentavos": 2000,
+    "orden": 1
+  },
+  {
+    "id": "plato-02",
+    "nombre": "Combo Arepa de Pollo Asado",
+    "categoria": "Arepas",
+    "descripcion": "2 arepas de pollo asado más bebida",
+    "precioCentavos": 2000,
+    "orden": 2
+  },
+  {
+    "id": "plato-03",
+    "nombre": "Combo Arepa Mixta Asada",
+    "categoria": "Arepas",
+    "descripcion": "2 arepas mixtas asadas más bebida",
+    "precioCentavos": 2000,
+    "orden": 3
+  },
+  {
+    "id": "plato-04",
+    "nombre": "Combo Arepa de Jamón y Queso",
+    "categoria": "Arepas",
+    "descripcion": "2 arepas de jamón y queso más bebida",
+    "precioCentavos": 2000,
+    "orden": 4
+  },
+  {
+    "id": "plato-05",
+    "nombre": "Combo Hamburguesa de Carne",
+    "categoria": "Hamburguesas",
+    "descripcion": "2 hamburguesas de carne más papas fritas y bebida",
+    "precioCentavos": 2000,
+    "orden": 5
+  },
+  {
+    "id": "plato-06",
+    "nombre": "Combo Hamburguesa de Pollo",
+    "categoria": "Hamburguesas",
+    "descripcion": "2 hamburguesas de pollo más papas fritas y bebida",
+    "precioCentavos": 2000,
+    "orden": 6
+  },
+  {
+    "id": "plato-07",
+    "nombre": "Combo de 3 Empanadas",
+    "categoria": "Empanadas",
+    "descripcion": "Más bebida",
+    "precioCentavos": 1200,
+    "orden": 7
+  },
+  {
+    "id": "plato-08",
+    "nombre": "Sopa de Res",
+    "categoria": "Platos criollos",
+    "descripcion": "Más arepa, arroz y bebida",
+    "precioCentavos": 2000,
+    "orden": 8
+  },
+  {
+    "id": "plato-09",
+    "nombre": "Parrilla",
+    "categoria": "Platos criollos",
+    "descripcion": "De carne, puerco, pollo y chorizo, ensalada, arepa y bebida",
+    "precioCentavos": 2000,
+    "orden": 9
+  },
+  {
+    "id": "plato-10",
+    "nombre": "Hallacas",
+    "categoria": "Hallacas",
+    "descripcion": "De carne, puerco y pollo (paquete de 5 unidades)",
+    "precioCentavos": 3000,
+    "orden": 10,
+    "promocion": "5 x $30"
+  },
+  {
+    "id": "plato-11",
+    "nombre": "1 Hallaca",
+    "categoria": "Hallacas",
+    "descripcion": "Ensalada de gallina, bebida y pan",
+    "precioCentavos": 1200,
+    "orden": 11
+  },
+  {
+    "id": "plato-12",
+    "nombre": "Combo de 2 Perros Calientes",
+    "categoria": "Perros y pepitos",
+    "descripcion": "Más bebida",
+    "precioCentavos": 1200,
+    "orden": 12
+  },
+  {
+    "id": "plato-13",
+    "nombre": "Cachapa",
+    "categoria": "Platos criollos",
+    "descripcion": "Con queso de mano, nata, jamón y queso rallado",
+    "precioCentavos": 2000,
+    "orden": 13
+  },
+  {
+    "id": "plato-14",
+    "nombre": "Pepito Venezolano",
+    "categoria": "Perros y pepitos",
+    "descripcion": "De carne asada, pico de gallo y queso rallado",
+    "precioCentavos": 1500,
+    "orden": 14
+  },
+  {
+    "id": "plato-15",
+    "nombre": "Combo Deli Kids",
+    "categoria": "Infantil",
+    "descripcion": "Nuggets, papitas fritas más bebida",
+    "precioCentavos": 1200,
+    "orden": 15
+  },
+  {
+    "id": "plato-16",
+    "nombre": "Bebidas Surtidas",
+    "categoria": "Bebidas",
+    "descripcion": "Refrescos variados (Coca-Cola, Sprite, Fanta, etc.)",
+    "precioCentavos": 200,
+    "orden": 16
+  }
+]
