@@ -1,24 +1,21 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Administración · Delicias Criollas</title>
-<style>*{box-sizing:border-box}body{margin:0;background:#f6f7f9;color:#14161b;font:1rem/1.5 system-ui}header{display:flex;align-items:center;gap:1rem;background:#101010;color:white;border-bottom:4px solid #ffcc00;padding:.8rem max(1rem,5vw)}header img{width:70px}main{max-width:64rem;margin:auto;padding:1rem}section,article,form{background:white;border-radius:.7rem;margin:1rem 0;padding:1rem;border:1px solid #ddd}label{display:grid;gap:.3rem;margin:.55rem 0}input,button,select,textarea{font:inherit;padding:.55rem;min-height:44px}button{cursor:pointer;margin:.2rem;background:#ffcc00;border:0;border-radius:.4rem;color:#111}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}[hidden]{display:none!important}</style></head>
-<body><header><img src="../assets/logo-marca.webp" alt="Delicias Criollas"><h1>Administración</h1></header><main><p role="status" id="message"></p>
-<form id="login"><h2>Ingresar</h2><label>Correo<input name="email" type="email" autocomplete="username" required></label><label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label><button>Entrar</button></form>
-<div id="panel" hidden><button id="logout">Cerrar sesión</button><section><h2>Pedidos recientes</h2><div id="orders"></div></section>
+<style>*{box-sizing:border-box}body{margin:0;background:#f6f7f9;color:#14161b;font:1rem/1.5 system-ui}header{display:flex;align-items:center;gap:1rem;background:#101010;color:white;border-bottom:4px solid #ffcc00;padding:.8rem max(1rem,5vw)}header img{width:70px}main{max-width:64rem;margin:auto;padding:1rem}section,article,form{background:white;border-radius:.7rem;margin:1rem 0;padding:1rem;border:1px solid #ddd}label{display:grid;gap:.3rem;margin:.55rem 0}input,button,select,textarea{font:inherit;padding:.55rem;min-height:44px}button{cursor:pointer;margin:.2rem;background:#ffcc00;border:0;border-radius:.4rem;color:#111}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}[hidden]{display:none!important}header{background:#101010;border-image:linear-gradient(90deg,#ffcc00 33%,#003893 33% 67%,#cf142b 67%) 1}header a{margin-left:auto;color:white}h1,h2{letter-spacing:-.035em}h1{font-size:clamp(1.25rem,4vw,2rem)}section{padding:clamp(1rem,4vw,2.4rem);border-radius:1rem}button:focus-visible,a:focus-visible{outline:3px solid #004bcc}#message:empty{display:none}</style></head>
+<body><header><img src="../assets/logo-marca.webp" alt="Delicias Criollas"><h1>Administración</h1><a href="../">Ver la carta</a></header><main><p role="status" id="message"></p>
+
+<div id="panel"><section><h2>Pedidos recientes</h2><div id="orders"></div></section>
 <section><h2>Productos</h2><button id="seed">Cargar los productos iniciales que falten</button><div id="products"></div>
 <form id="editor"><h3 id="editing">Nuevo producto</h3><label>Nombre<input name="nombre" required></label><label>Categoría<input name="categoria" required></label><label>Precio en USD<input name="precio" type="number" min="0" step=".01" required></label><label>Descripción<textarea name="descripcion"></textarea></label><label>Promoción<input name="promocion"></label><label>Orden<input name="orden" type="number" min="0" step="1"></label><label>ID público de la foto en Cloudinary<input name="fotoPublicId"></label><button>Guardar producto</button><button type="reset">Limpiar</button></form></section></div></main>
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
 import {getFirestore,collection,doc,setDoc,updateDoc,deleteDoc,onSnapshot,query,orderBy,runTransaction} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 const app=initializeApp({apiKey:'AIzaSyCcE1vtt4laxA_CRNKqFxu4RDr36cYeiRE',authDomain:'delicias-9c0b0.firebaseapp.com',projectId:'delicias-9c0b0',appId:'1:533374986764:web:9a29287e6b49b21d8c5c29'});
-const auth=getAuth(app),db=getFirestore(app);
+const db=getFirestore(app);
 const $=id=>document.getElementById(id);
-const form=$('editor'),login=$('login');
-let editId=null,subscriptions=[],receipts=[];
+const form=$('editor');
+let editId=null,receipts=[];
 const message=text=>{$('message').textContent=text;};
 const fail=()=>message('No se pudo completar la operación. Comprueba la conexión y los permisos.');
 function button(text,action){const el=document.createElement('button');el.textContent=text;el.onclick=action;return el;}
-login.onsubmit=async e=>{e.preventDefault();try{await signInWithEmailAndPassword(auth,login.email.value,login.password.value);login.reset();}catch{message('No se pudo iniciar sesión. Revisa tus datos.');}};
-$('logout').onclick=()=>signOut(auth).catch(fail);
 const states=['Nuevo','En preparación','Listo','Entregado','Cancelado'];
 function renderOrders(){
   const active=receipts.filter(d=>d.data().expira.toMillis()>Date.now());
@@ -33,13 +30,8 @@ function renderOrders(){
 }
 setInterval(renderOrders,60000);
 form.onreset=()=>{editId=null;$('editing').textContent='Nuevo producto';};
-onAuthStateChanged(auth,user=>{
-  subscriptions.forEach(stop=>stop());subscriptions=[];receipts=[];
-  $('orders').replaceChildren();$('products').replaceChildren();form.reset();message('');
-  login.hidden=!!user;$('panel').hidden=!user;
-  if(!user)return;
-  subscriptions.push(onSnapshot(query(collection(db,'pedidos'),orderBy('creado','desc')),snap=>{receipts=snap.docs;renderOrders();},fail));
-  subscriptions.push(onSnapshot(collection(db,'menuPublico'),snap=>{
+onSnapshot(query(collection(db,'pedidosPanel'),orderBy('creado','desc')),snap=>{receipts=snap.docs;renderOrders();},fail);
+  onSnapshot(collection(db,'menuPublico'),snap=>{
     $('products').replaceChildren(...snap.docs.map(d=>{
       const row=document.createElement('article'),p=d.data(),name=document.createElement('strong');
       name.textContent=p.nombre+' · $'+(p.precioCentavos/100).toFixed(2)+' ';
@@ -48,8 +40,7 @@ onAuthStateChanged(auth,user=>{
         form.precio.value=(p.precioCentavos/100).toFixed(2);form.nombre.focus();}),
         button('Quitar',async()=>{if(confirm('¿Quitar '+p.nombre+' de la carta?'))try{await deleteDoc(d.ref);if(editId===d.id)form.reset();}catch{fail();}}));return row;
     }));
-  },fail));
-});
+  },fail);
 form.onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(form));data.precioCentavos=Math.round(Number(data.precio)*100);delete data.precio;data.orden=Number(data.orden||999);
   try{const ref=editId?doc(db,'menuPublico',editId):doc(collection(db,'menuPublico'));await setDoc(ref,data,{merge:true});form.reset();message('Producto guardado.');}catch{fail();}};
 $('seed').onclick=async()=>{try{const res=await fetch('../data/menu-inicial.json');if(!res.ok)throw Error();const entries=await res.json();

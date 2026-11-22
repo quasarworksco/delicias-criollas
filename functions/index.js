@@ -40,6 +40,10 @@ exports.crearPedido = onRequest({cors:true, maxInstances:5}, async (req,res) => 
       const now = Date.now();
       const data = {recibo, total, estado:'Nuevo', creado:Timestamp.fromMillis(now), expira:Timestamp.fromMillis(now+48*3600000)};
       tx.create(ref,data);
+      const resumen = ['Pedido '+ref.id, modalidad,
+        ...lineas.map(i => i.cantidad+' × '+i.nombre),
+        'Total de productos: $'+(total/100).toFixed(2)+' USD'].join('\n');
+      tx.create(db.collection('pedidosPanel').doc(ref.id), {...data, recibo:resumen});
       return data;
     });
     res.json({id:ref.id,recibo:pedido.recibo});
@@ -51,10 +55,13 @@ exports.crearPedido = onRequest({cors:true, maxInstances:5}, async (req,res) => 
 exports.limpiarRecibos = onSchedule('every 5 minutes', async () => {
   const cutoff = Timestamp.now();
   for (;;) {
-    const expired = await db.collection('pedidos').where('expira','<=',cutoff).limit(400).get();
+    const expired = await db.collection('pedidos').where('expira','<=',cutoff).limit(200).get();
     if (expired.empty) return;
     const batch = db.batch();
-    expired.docs.forEach(doc => batch.delete(doc.ref));
+    expired.docs.forEach(doc => {
+      batch.delete(doc.ref);
+      batch.delete(db.collection('pedidosPanel').doc(doc.id));
+    });
     await batch.commit();
   }
 });
