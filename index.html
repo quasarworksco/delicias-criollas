@@ -422,14 +422,19 @@
     const notice = document.querySelector('#cart-message');
     const receipt = document.querySelector('#receipt');
     const send = document.querySelector('#send-order');
+    function clearPreview() {
+      send.hidden = true;
+      send.removeAttribute('href');
+      receipt.textContent = '';
+      notice.textContent = '';
+    }
+    form.addEventListener('input',clearPreview);
     function agregar(dish) {
       if (busy) return;
       const entry = lines.get(dish.id) ?? {dish, quantity:0};
       entry.quantity = Math.min(99,entry.quantity+1);
       lines.set(dish.id,entry);
-      send.hidden = true;
-      receipt.textContent = '';
-      notice.textContent = '';
+      clearPreview();
       drawCart();
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
         cartButton.getAnimations().forEach(animation => animation.cancel());
@@ -457,6 +462,7 @@
           button.setAttribute('aria-label',(delta < 0 ? 'Quitar ' : 'Agregar ')+dish.name);
           button.disabled = busy || (delta === 1 && quantity === 99);
           button.onclick = () => {
+            clearPreview();
             entry.quantity += delta;
             if (!entry.quantity) lines.delete(id);
             drawCart();
@@ -486,7 +492,9 @@
         productos:[...lines].map(([id,entry])=>({id,cantidad:entry.quantity}))};
       const current = JSON.stringify(data);
       if (signature !== current) { key = crypto.randomUUID(); signature = current; }
+      clearPreview();
       busy = true;
+      form.inert = true;
       form.querySelector('button').disabled = true;
       drawCart();
       notice.textContent = 'Registrando tu pedido…';
@@ -494,17 +502,37 @@
         const response = await fetch('https://us-central1-delicias-9c0b0.cloudfunctions.net/crearPedido',{
           method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,clave:key}),signal:AbortSignal.timeout(20000)
         });
+        if (response.status === 400) {
+          notice.textContent = 'El restaurante no pudo validar los productos o los datos. Revisa la carta y el formulario antes de reintentar.';
+          return;
+        }
         if (!response.ok) throw new Error();
         const order = await response.json();
         if (!order.recibo) throw new Error();
+        send.textContent = 'Enviar recibo por WhatsApp';
         receipt.textContent = order.recibo;
         send.href = 'https://wa.me/13853846868?text='+encodeURIComponent(order.recibo);
         send.hidden = false;
         notice.textContent = 'Pedido registrado. Envía el recibo al restaurante.';
         lines.clear();
         signature = '';
-      } catch { notice.textContent = 'No pudimos confirmar el pedido. Reintenta o contacta al restaurante.'; }
-      finally { busy=false;form.querySelector('button').disabled=false;drawCart(); }
+      } catch {
+        const items = [...lines.values()];
+        const total = items.reduce((sum,{dish,quantity})=>sum+dish.cents*quantity,0);
+        const summary = ['Delicias Criollas · Solicitud pendiente de confirmación',
+          data.modalidad+' · '+data.nombre, data.destino,
+          ...items.map(({dish,quantity})=>quantity+' × '+dish.name+' · '+currency.format(dish.cents*quantity/100)),
+          'Total de productos según la carta: '+currency.format(total/100),
+          data.modalidad==='Delivery'?'Envío por confirmar.':'',
+          'Por favor, confirma disponibilidad y si ya recibiste este pedido.'
+        ].filter(Boolean).join('\n');
+        notice.textContent = 'El registro en línea no está confirmado. Puedes reintentar o enviar la solicitud al restaurante para que la confirme.';
+        receipt.textContent = summary;
+        send.href = 'https://wa.me/13853846868?text='+encodeURIComponent(summary);
+        send.textContent = 'Solicitar confirmación por WhatsApp';
+        send.hidden = false;
+      }
+      finally { busy=false;form.inert=false;form.querySelector('button').disabled=false;drawCart(); }
     };
 
     search.addEventListener('input', () => render());
