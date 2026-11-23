@@ -132,6 +132,10 @@
     .dish-copy{padding:clamp(.75rem,2.5vw,1.65rem)}
     @media(max-width:38rem){.hero-copy{margin-bottom:1rem}.hero > img{object-position:76% center}.dish-copy{display:flex;flex-direction:column;align-items:start}.dish p{font-size:.87rem}}
     .cart-open,.add{background:#ffcc00;color:#111;border:0;border-radius:.55rem;font:700 .9rem Manrope,system-ui;padding:.65rem .85rem;min-height:44px;cursor:pointer}
+    .cart-open{position:fixed;left:calc(1rem + env(safe-area-inset-left));bottom:calc(1rem + env(safe-area-inset-bottom));z-index:10;display:inline-flex;align-items:center;gap:.55rem;min-height:54px;padding:.55rem 1rem;border:2px solid white;border-radius:99px;box-shadow:0 8px 24px #0005,0 2px 6px #0003}
+    .cart-count{display:grid;place-items:center;min-width:1.7rem;height:1.7rem;padding:0 .35rem;border-radius:2rem;background:#171717;color:white;font-variant-numeric:tabular-nums}
+    .cart-open:active{transform:scale(.97)}
+    @media(hover:hover){.cart-open:hover{background:#ffdc47}}
     .add{grid-column:1/-1;justify-self:start;align-self:start}
     dialog{color-scheme:light;background:white;color:#111;border:0;border-radius:1rem;width:min(30rem,94vw);max-height:88dvh;padding:1.5rem}
     dialog::backdrop{background:#0009;backdrop-filter:blur(5px)}
@@ -171,7 +175,7 @@
   <header>
     <div class="top wrap">
       <a class="brand" href="#inicio" aria-label="Delicias Criollas, inicio"><img src="assets/logo-marca.webp" width="61" height="44" alt=""><span>Delicias Criollas</span></a>
-      <nav aria-label="Principal"><button class="cart-open" type="button">Carrito (0)</button><a href="#menu">La carta</a><a href="#visitanos">Visítanos</a></nav>
+      <nav aria-label="Principal"><a href="#menu">La carta</a><a href="#visitanos">Visítanos</a></nav>
     </div>
   </header>
   <main>
@@ -209,6 +213,10 @@
       </div>
     </section>
   </main>
+  <button class="cart-open" type="button" aria-controls="cart" aria-haspopup="dialog" aria-label="Ver carrito, 0 productos">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h3l3 12h11l3-9H6"/><circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>
+    Ver carrito <span class="cart-count">0</span>
+  </button>
   <a class="floating" href="https://wa.me/13853846868" aria-label="Escribir a Delicias Criollas por WhatsApp"><svg class="icon" aria-hidden="true"><use href="#chat"/></svg><span>WhatsApp</span></a>
   <footer class="footer"><div class="wrap"><span>© 2026 Delicias Criollas</span><a href="https://dgpglobalgroup.com">Diseñado por DGP Global Group</a></div></footer>
   <dialog id="photo-viewer" aria-labelledby="photo-title">
@@ -423,6 +431,12 @@
       receipt.textContent = '';
       notice.textContent = '';
       drawCart();
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        cartButton.getAnimations().forEach(animation => animation.cancel());
+        cartButton.animate([
+          {transform:'translateY(0)'}, {transform:'translateY(-5px) scale(1.04)'}, {transform:'translateY(0)'}
+        ], {duration:300, easing:'ease-out'});
+      }
     }
     function drawCart() {
       const container = document.querySelector('#lines');
@@ -451,7 +465,8 @@
         }
         container.append(row);
       }
-      cartButton.textContent = 'Carrito ('+count+')';
+      cartButton.querySelector('.cart-count').textContent = count;
+      cartButton.setAttribute('aria-label','Ver carrito, '+count+(count===1?' producto':' productos'));
       document.querySelector('#sum').textContent = count ? 'Productos · '+currency.format(total/100) : receipt.textContent ? '' : 'Tu carrito está vacío.';
       form.hidden = !count;
     }
