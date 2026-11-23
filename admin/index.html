@@ -17,7 +17,11 @@
 <label class="wide">Descripción<textarea name="descripcion" rows="2"></textarea></label>
 <label>Promoción<input name="promocion"></label>
 <label>Posición en la carta<input name="orden" type="number" min="0" step="1"></label>
-<label class="wide">Foto en Cloudinary<input name="fotoPublicId" placeholder="ID público de la imagen"></label>
+<fieldset class="wide photo-fields"><legend>Foto del producto</legend>
+<label>Cargar imagen<input type="file" id="archivo-foto" accept="image/*"></label>
+<label>O pegar enlace de imagen<input name="fotoUrl" type="url" pattern="https://.+" placeholder="https://…" title="Usa un enlace que empiece por https://"></label>
+<img id="vista-foto" alt="Vista previa de la foto" hidden>
+</fieldset>
 </div><div class="actions"><button>Guardar producto</button><button type="reset">Limpiar</button></div></form>
 </div></main>
 <script type="module">
@@ -41,6 +45,7 @@ try {
 </script>
 <script type="module">
 import {inicial, combinar} from '../data/catalogo.js';
+import {prepararFoto,guardarFoto} from './foto.js';
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
 import {getFirestore,collection,doc,setDoc,updateDoc,onSnapshot,query,orderBy,runTransaction} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 const app=initializeApp({apiKey:'AIzaSyCcE1vtt4laxA_CRNKqFxu4RDr36cYeiRE',authDomain:'delicias-9c0b0.firebaseapp.com',projectId:'delicias-9c0b0',appId:'1:533374986764:web:9a29287e6b49b21d8c5c29'});
@@ -64,7 +69,7 @@ function renderOrders(){
   if(!active.length) $('orders').textContent='Sin pedidos en las últimas 48 horas.';
 }
 setInterval(renderOrders,60000);
-form.onreset=()=>{editId=null;$('editing').textContent='Nuevo producto';};
+form.onreset=()=>{prepararFoto();editId=null;$('editing').textContent='Nuevo producto';};
 onSnapshot(query(collection(db,'pedidosPanel'),orderBy('creado','desc')),snap=>{receipts=snap.docs;renderOrders();},fail);
   onSnapshot(collection(db,'menuPublico'),async snap=>{
     const publicados=snap.docs.map(d=>({...d.data(),id:d.id}));
@@ -76,17 +81,29 @@ onSnapshot(query(collection(db,'pedidosPanel'),orderBy('creado','desc')),snap=>{
       name.textContent=p.nombre+' · $'+(p.precioCentavos/100).toFixed(2)+' ';
       const image=document.createElement('img');
       image.alt='';image.loading='lazy';
-      image.src=p.fotoPublicId ? 'https://res.cloudinary.com/do4fpfwlb/image/upload/f_auto,q_auto,c_fill,w_128,h_128/'+String(p.fotoPublicId).split('/').map(encodeURIComponent).join('/') :
+      image.src=/^https:\/\//i.test(p.fotoUrl) ? p.fotoUrl : p.fotoPublicId ? 'https://res.cloudinary.com/do4fpfwlb/image/upload/f_auto,q_auto,c_fill,w_128,h_128/'+String(p.fotoPublicId).split('/').map(encodeURIComponent).join('/') :
         /^plato-(0[1-9]|1[0-6])$/.test(d.id) ? '../assets/platos/'+d.id+'.webp' : '../assets/logo-marca.webp';
       image.onerror=()=>{image.onerror=null;image.src='../assets/logo-marca.webp';};
       row.append(image,name,button('Editar',()=>{editId=d.id;$('editing').textContent='Editar producto';
-        for(const field of ['nombre','categoria','descripcion','promocion','orden','fotoPublicId'])form.elements[field].value=p[field]??'';
+        for(const field of ['nombre','categoria','descripcion','promocion','orden'])form.elements[field].value=p[field]??'';
+        prepararFoto(p.fotoUrl || '',p.fotoUrl ? '' : image.src);
         form.precio.value=(p.precioCentavos/100).toFixed(2);form.nombre.focus();}),
         button('Quitar',async()=>{if(confirm('¿Quitar '+p.nombre+' de la carta?'))try{await setDoc(d.ref,{...p,retirado:true},{merge:true});if(editId===d.id)form.reset();}catch{fail();}}));return row;
     }));
   },fail);
 form.onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(form));data.precioCentavos=Math.round(Number(data.precio)*100);delete data.precio;data.orden=Number(data.orden||999);
-  try{const ref=editId?doc(db,'menuPublico',editId):doc(collection(db,'menuPublico'));await setDoc(ref,data,{merge:true});form.reset();message('Producto guardado.');}catch{fail();}};
+  if(form.inert)return;
+  const ref=editId?doc(db,'menuPublico',editId):doc(collection(db,'menuPublico'));
+  form.inert=true;
+  try {
+    try { data.fotoUrl=await guardarFoto(); }
+    catch { message('No se pudo cargar la imagen. Reintenta o pega su enlace.');return; }
+    if(data.fotoUrl) data.fotoPublicId='';
+    await setDoc(ref,data,{merge:true});
+    form.reset();message('Producto guardado.');
+  } catch { fail(); }
+  finally { form.inert=false; }
+};
 async function cargarInicial(){try{const entries=await inicial;
   await runTransaction(db,async tx=>{const refs=entries.map(p=>doc(db,'menuPublico',p.id));const docs=await Promise.all(refs.map(ref=>tx.get(ref)));
     entries.forEach(({id,...data},i)=>{if(!docs[i].exists())tx.set(refs[i],data);});});message('Catálogo inicial cargado.');}catch{fail();}}

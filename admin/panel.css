@@ -45,3 +45,6 @@ button:hover{filter:brightness(.95)}
 #message:empty{display:none}
 @media(max-width:55rem){.workspace{grid-template-columns:1fr}}
 @media(max-width:35rem){.mast{min-height:7rem}.mast a{padding:.55rem;font-size:.8rem}.fields{gap:.75rem}#products article{grid-template-columns:3rem 1fr auto}#products article button:last-child{grid-column:3}nav div{gap:.85rem;font-size:.9rem}}
+.photo-fields{display:grid;gap:.8rem;min-width:0;margin:0;border:1px solid #d9dce1;border-radius:.75rem;padding:1rem}
+.photo-fields legend{padding:0 .35rem;font-weight:700}
+#vista-foto{width:112px;height:112px;object-fit:cover;border-radius:.6rem}

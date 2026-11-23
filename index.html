@@ -233,7 +233,7 @@
       const order = record.orden;
       if (!name || !section || !Number.isSafeInteger(cents) || cents < 0) return null;
       return {
-        name, section, cents, description: str(record.descripcion), photo: str(record.fotoPublicId),
+        name, section, cents, description: str(record.descripcion), photo: str(record.fotoPublicId), photoUrl: str(record.fotoUrl),
         promotion: str(record.promocion),
         id: str(record.id),
         order: Number.isSafeInteger(order) ? order : Number.MAX_SAFE_INTEGER
@@ -251,7 +251,7 @@
       image.height = 320;
       image.alt = '';
       image.addEventListener('error', () => { image.src = fallback; }, {once: true});
-      image.src = /^[\w-]+(?:\/[\w-]+)*$/.test(dish.photo)
+      image.src = /^https:\/\//i.test(dish.photoUrl) ? dish.photoUrl : /^[\w-]+(?:\/[\w-]+)*$/.test(dish.photo)
         ? `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto,c_fill,w_420,h_420/${dish.photo}`
         : fallback;
       item.append(image);
