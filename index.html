@@ -238,6 +238,7 @@
     <a id="send-order" hidden target="_blank" rel="noopener">Enviar recibo por WhatsApp</a>
   </dialog>
   <script type="module">
+    import {referenciaVisible} from "./data/recibo.js";
     import {inicial, combinar} from "./data/catalogo.js";
     const project = 'delicias-9c0b0';
     const apiKey = 'AIzaSyCcE1vtt4laxA_CRNKqFxu4RDr36cYeiRE';
@@ -506,7 +507,7 @@
         const id = Array.from(new Uint8Array(digest).slice(0,12),byte=>byte.toString(16).padStart(2,'0')).join('');
         const items = [...lines.values()];
         const total = items.reduce((sum,{dish,quantity})=>sum+dish.cents*quantity,0);
-        const summary = ['Delicias Criollas · Pedido '+id, data.modalidad+' · '+data.nombre,
+        const summary = [referenciaVisible('Delicias Criollas · Pedido '+id), data.modalidad+' · '+data.nombre,
           data.destino, ...items.map(({dish,quantity})=>quantity+' × '+dish.name+' — '+currency.format(dish.cents*quantity/100)),
           'Total de productos: '+currency.format(total/100)+' USD',
           data.modalidad==='Delivery'?'Envío por confirmar con el restaurante.':''
@@ -527,7 +528,7 @@
         if (!response.ok) throw new Error();
         const order = await response.json();
         if (!order.recibo) throw new Error();
-        receipt.textContent = order.recibo;
+        receipt.textContent = referenciaVisible(order.recibo);
         notice.textContent = chat ? 'Pedido registrado. Completa el envío en WhatsApp.' : 'Pedido registrado. Abre WhatsApp para enviar el mensaje.';
         lines.clear();
         signature = '';

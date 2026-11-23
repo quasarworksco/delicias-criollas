@@ -44,6 +44,7 @@ try {
 } catch { document.querySelector('#message').textContent = 'No se pudo cargar la carta inicial.'; }
 </script>
 <script type="module">
+import {referenciaVisible} from '../data/recibo.js';
 import {inicial, combinar} from '../data/catalogo.js';
 import {prepararFoto,guardarFoto} from './foto.js';
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
@@ -61,7 +62,7 @@ function renderOrders(){
   const active=receipts.filter(d=>d.data().expira.toMillis()>Date.now());
   $('orders').replaceChildren(...active.map(d=>{
     const row=document.createElement('article'),pre=document.createElement('pre'),label=document.createElement('label'),select=document.createElement('select');
-    pre.textContent=d.data().recibo;label.textContent='Estado del pedido';
+    pre.textContent=referenciaVisible(d.data().recibo);label.textContent='Estado del pedido';
     states.forEach(s=>select.add(new Option(s,s,false,s===d.data().estado)));
     select.onchange=async()=>{try{await updateDoc(d.ref,{estado:select.value});}catch{fail();renderOrders();}};
     label.append(select);row.append(pre,label);return row;
