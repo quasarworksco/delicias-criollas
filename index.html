@@ -497,11 +497,29 @@
       form.inert = true;
       form.querySelector('button').disabled = true;
       drawCart();
+      const chat = window.open('about:blank','_blank');
+      if (chat) chat.opener = null;
       notice.textContent = 'Registrando tu pedido…';
       try {
-        const response = await fetch('https://us-central1-delicias-9c0b0.cloudfunctions.net/crearPedido',{
-          method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,clave:key}),signal:AbortSignal.timeout(20000)
+        // La función usa los primeros 12 bytes del mismo hash como ID de Firestore.
+        const digest = await crypto.subtle.digest('SHA-256',new TextEncoder().encode(key));
+        const id = Array.from(new Uint8Array(digest).slice(0,12),byte=>byte.toString(16).padStart(2,'0')).join('');
+        const items = [...lines.values()];
+        const total = items.reduce((sum,{dish,quantity})=>sum+dish.cents*quantity,0);
+        const summary = ['Delicias Criollas · Pedido '+id, data.modalidad+' · '+data.nombre,
+          data.destino, ...items.map(({dish,quantity})=>quantity+' × '+dish.name+' — '+currency.format(dish.cents*quantity/100)),
+          'Total de productos: '+currency.format(total/100)+' USD',
+          data.modalidad==='Delivery'?'Envío por confirmar con el restaurante.':''
+        ].filter(Boolean).join('\n');
+        send.href = 'https://wa.me/13853846868?text='+encodeURIComponent(summary);
+        send.textContent = 'Abrir WhatsApp';
+        send.hidden = !!chat;
+        const registration = fetch('https://us-central1-delicias-9c0b0.cloudfunctions.net/crearPedido',{
+          method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,clave:key}),
+          keepalive:true,signal:AbortSignal.timeout(20000)
         });
+        if (chat) chat.location.replace(send.href);
+        const response = await registration;
         if (response.status === 400) {
           notice.textContent = 'El restaurante no pudo validar los productos o los datos. Revisa la carta y el formulario antes de reintentar.';
           return;
@@ -509,28 +527,12 @@
         if (!response.ok) throw new Error();
         const order = await response.json();
         if (!order.recibo) throw new Error();
-        send.textContent = 'Enviar recibo por WhatsApp';
         receipt.textContent = order.recibo;
-        send.href = 'https://wa.me/13853846868?text='+encodeURIComponent(order.recibo);
-        send.hidden = false;
-        notice.textContent = 'Pedido registrado. Envía el recibo al restaurante.';
+        notice.textContent = chat ? 'Pedido registrado. Completa el envío en WhatsApp.' : 'Pedido registrado. Abre WhatsApp para enviar el mensaje.';
         lines.clear();
         signature = '';
       } catch {
-        const items = [...lines.values()];
-        const total = items.reduce((sum,{dish,quantity})=>sum+dish.cents*quantity,0);
-        const summary = ['Delicias Criollas · Solicitud pendiente de confirmación',
-          data.modalidad+' · '+data.nombre, data.destino,
-          ...items.map(({dish,quantity})=>quantity+' × '+dish.name+' · '+currency.format(dish.cents*quantity/100)),
-          'Total de productos según la carta: '+currency.format(total/100),
-          data.modalidad==='Delivery'?'Envío por confirmar.':'',
-          'Por favor, confirma disponibilidad y si ya recibiste este pedido.'
-        ].filter(Boolean).join('\n');
-        notice.textContent = 'El registro en línea no está confirmado. Puedes reintentar o enviar la solicitud al restaurante para que la confirme.';
-        receipt.textContent = summary;
-        send.href = 'https://wa.me/13853846868?text='+encodeURIComponent(summary);
-        send.textContent = 'Solicitar confirmación por WhatsApp';
-        send.hidden = false;
+        notice.textContent = 'El registro en el panel está pendiente de confirmación. Puedes reintentar con el mismo número de pedido.';
       }
       finally { busy=false;form.inert=false;form.querySelector('button').disabled=false;drawCart(); }
     };
