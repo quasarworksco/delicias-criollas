@@ -139,6 +139,23 @@
     dialog input,dialog select{padding:.6rem;min-height:44px;background:white;color:#111;border:1px solid #888;border-radius:.4rem}
     dialog button{min-height:44px} .cart-line{display:flex;gap:.6rem;align-items:center;border-bottom:1px solid #ddd;padding:.5rem 0}.cart-line span{flex:1}
     dialog pre{white-space:pre-wrap;font:inherit} dialog a{color:#003893}
+    .dish-photo{position:relative;align-self:stretch;min-width:0;border:0;padding:0;background:#121212;cursor:zoom-in}
+    .dish-photo:focus-visible{outline-offset:-4px;z-index:1}
+    .dish-photo::after{content:"+";position:absolute;bottom:.55rem;right:.55rem;width:1.75rem;height:1.75rem;display:grid;place-items:center;background:#101010cc;border:1px solid #fff9;border-radius:50%;color:white;font-size:1.25rem;line-height:1}
+    #photo-viewer{width:min(40rem,94vw);padding:1rem}
+    #photo-viewer form{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.75rem}
+    #photo-viewer h2{font-size:1.6rem}
+    #photo-viewer button{border:0;background:#ffcc00;padding:.5rem 1rem;border-radius:.5rem}
+    #photo-viewer img{display:block;width:100%;height:auto;max-height:65dvh;object-fit:contain;background:#121212;border-radius:.6rem}
+    @media(max-width:38rem){
+      .dish{grid-template-columns:minmax(0,1fr);overflow:hidden}
+      .dish-photo{height:clamp(13rem,65vw,19rem);background:#f5f5f5}
+      .dish-photo img{height:100%;width:100%;min-height:0;object-fit:contain;background:transparent}
+      .dish-copy{display:grid;grid-template-columns:minmax(0,1fr) auto;padding:1rem;gap:.55rem 1rem}
+      .dish-copy .add{justify-self:stretch}
+      .filters{scroll-snap-type:x proximity}
+      .filters button{scroll-snap-align:start}
+    }
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
   </style>
 </head>
@@ -194,6 +211,10 @@
   </main>
   <a class="floating" href="https://wa.me/13853846868" aria-label="Escribir a Delicias Criollas por WhatsApp"><svg class="icon" aria-hidden="true"><use href="#chat"/></svg><span>WhatsApp</span></a>
   <footer class="footer"><div class="wrap"><span>© 2026 Delicias Criollas</span><a href="https://dgpglobalgroup.com">Diseñado por DGP Global Group</a></div></footer>
+  <dialog id="photo-viewer" aria-labelledby="photo-title">
+    <form method="dialog"><h2 id="photo-title"></h2><button autofocus>Cerrar</button></form>
+    <img alt="">
+  </dialog>
   <dialog id="cart" aria-labelledby="cart-title">
     <button type="button" id="close-cart">Cerrar</button>
     <h2 id="cart-title">Tu pedido</h2>
@@ -252,9 +273,21 @@
       image.alt = '';
       image.addEventListener('error', () => { image.src = fallback; }, {once: true});
       image.src = /^https:\/\//i.test(dish.photoUrl) ? dish.photoUrl : /^[\w-]+(?:\/[\w-]+)*$/.test(dish.photo)
-        ? `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto,c_fill,w_420,h_420/${dish.photo}`
+        ? `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto,c_limit,w_960,h_960/${dish.photo}`
         : fallback;
-      item.append(image);
+      const photoButton = document.createElement('button');
+      photoButton.type = 'button';
+      photoButton.className = 'dish-photo';
+      photoButton.setAttribute('aria-label', 'Ampliar foto de '+dish.name);
+      photoButton.setAttribute('aria-haspopup', 'dialog');
+      photoButton.append(image);
+      photoButton.onclick = () => {
+        const viewer = document.querySelector('#photo-viewer');
+        viewer.querySelector('h2').textContent = dish.name;
+        viewer.querySelector('img').src = image.currentSrc || image.src;
+        viewer.showModal();
+      };
+      item.append(photoButton);
       const copy = document.createElement('div');
       copy.className = 'dish-copy';
       const title = document.createElement('h3');
